@@ -1,0 +1,26 @@
+[tool.poetry]
+name="executor"
+version="0.0.1"
+description="terminal manager"
+authors=["Neg <serg.zorg@gmail.com>"]
+license="LGPL-3.0 License"
+readme=['README.md']
+homepage=""
+repository=""
+packages=[
+    {include='executor/__main__.py'},
+    {include='executor/*.py'},
+]
+
+[tool.poetry.dependencies]
+docopt='*'
+i3ipc='*'
+inotipy='*'
+ruamel-yaml='*'
+python='^3.8'
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires=["poetry-core>=1.0.0"]
+build-backend="poetry.core.masonry.api"
