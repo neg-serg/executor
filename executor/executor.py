@@ -6,10 +6,51 @@ scripts, because there is no parsing / translation phase here in runtime. '''
 
 import subprocess
 import shlex
+import asyncio
+from typing import List
 from executor.execenv import execenv as env
 from executor.cfg import cfg
 
-class Executor():
+class extension():
+    def __init__(self):
+        pass
+
+    def send_msg(self, args: List):
+        """ Creates bindings from socket IPC to current module public function
+        calls. This function defines bindings to the module methods that can be
+        used by external users as i3-bindings, etc. Need the [send] binary
+        which can send commands to the appropriate socket.
+        args (List): argument list for the selected function. """
+        return getattr(self, args[0])(*args[1:])
+
+class MsgBroker():
+    lock=asyncio.Lock()
+
+    @classmethod
+    def mainloop(cls, loop, mod, port) -> None:
+        """ Mainloop by loop create task """
+        cls.mod=mod
+        loop.create_task(asyncio.start_server(
+            cls.handle_client, 'localhost', port))
+        loop.run_forever()
+
+    @classmethod
+    async def handle_client(cls, reader, writer) -> None:
+        """ Proceed client message here """
+        async with cls.lock:
+            while True:
+                response=(await reader.readline()).decode('utf8').split()
+                if not response:
+                    return
+                ret = cls.mod.send_msg(response)
+                if ret:
+                    writer.write(bytes(f'{ret}\n', 'utf-8'))
+                    await writer.drain()
+                    writer.close()
+                    await writer.wait_closed()
+                    
+
+class Executor(extension):
     ''' Terminal manager. Easy and consistent way to create tmux sessions on dedicated sockets. The main advantage is dynamic config
     reloading and simplicity of adding or modifing of various parameters. '''
     def __init__(self) -> None:
@@ -41,15 +82,15 @@ class Executor():
             check=False
         ).stdout.decode()
 
-    def tmux_attach(self) -> None:
+    def tmux_attach(self) -> str:
         ''' Run tmux to attach to given socket. '''
         name = self.env.name
         cmd = f"{self.env.opts}" \
             f" {self.env.shell()} -i -c" \
             f" \'{env.tmux_session_attach(name)}\'"
-        Executor.print_exec(cmd)
+        return cmd
 
-    def tmux_create_session(self) -> None:
+    def tmux_create_session(self) -> str:
         ''' Run tmux to create the new session on given socket. '''
         exec_cmd = ''
         for pos, token in enumerate(self.env.exec_tmux):
@@ -64,9 +105,13 @@ class Executor():
             f" {self.env.shell()} -i -c" \
             f" \'{env.tmux_new_session(self.env.name)}" + \
             f" {exec_cmd} && {env.tmux_session_attach(name)}\'"
-        Executor.print_exec(cmd)
+        return cmd
 
-    def run(self, name: str) -> None:
+    def run(self, name):
+        cmd = self.create_cmd(name)
+        return cmd
+
+    def create_cmd(self, name: str) -> str:
         ''' Entry point, run application with Tmux on dedicated socket(in most
         cases), or without tmux, exec_tmux is empty.
         name (str): target application name, taken from config file '''
@@ -76,9 +121,10 @@ class Executor():
             if self.env.name in self.detect_session_bind(self.env.name):
                 import i3ipc
                 if not i3ipc.Connection().get_tree().find_classed(self.env.wclass):
-                    self.tmux_attach()
+                    return self.tmux_attach()
             else:
-                self.tmux_create_session()
+                return self.tmux_create_session()
         else:
             cmd = f'{self.env.opts} {self.env.exec}'
-            Executor.print_exec(cmd)
+            return cmd
+        return ''

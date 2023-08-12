@@ -1,1 +1,3 @@
 # Executor
+
+Basic terminal manager
