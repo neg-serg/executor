@@ -1,7 +1,7 @@
 [tool.poetry]
 name="executor"
-version="0.0.1"
-description="terminal manager"
+version="0.0.2"
+description="Terminal manager"
 authors=["Neg <serg.zorg@gmail.com>"]
 license="LGPL-3.0 License"
 readme=['README.md']
