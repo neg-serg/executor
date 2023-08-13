@@ -15,7 +15,6 @@ packages=[
 [tool.poetry.dependencies]
 docopt='*'
 i3ipc='*'
-inotipy='*'
 ruamel-yaml='*'
 python='^3.8'
 
