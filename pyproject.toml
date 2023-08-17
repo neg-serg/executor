@@ -1,6 +1,6 @@
 [tool.poetry]
 name="executor"
-version="0.0.2"
+version="0.0.3"
 description="Terminal manager"
 authors=["Neg <serg.zorg@gmail.com>"]
 license="LGPL-3.0 License"
