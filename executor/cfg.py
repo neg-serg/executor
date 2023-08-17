@@ -13,6 +13,7 @@ class cfg():
             quit()
         else:
             cfg.create_dir(config_dir)
+        self.config_dir=config_dir
         self.cfg_path=f'{config_dir}/{self.mod}.yml'
         if os.path.isfile(self.cfg_path) and os.stat(self.cfg_path).st_size > 0:
             self.cfg={}
@@ -20,6 +21,11 @@ class cfg():
         else:
             logging.error(f'There is no config file in {self.cfg_path}, exit')
             quit()
+
+
+    def dir(self) -> str:
+        """ Return config dir """
+        return self.config_dir
 
     @staticmethod
     def create_dir(dirname) -> None:
@@ -34,6 +40,25 @@ class cfg():
             if oserr.errno != errno.EEXIST:
                 raise
 
+    def reload(self, mod, *_) -> str:
+        """ Reload config for current selected module. Call load_config, print
+        debug messages and reinit all stuff. """
+        prev_conf=self.cfg
+        ret=''
+        try:
+            self.load_config()
+            mod.__init__()
+            ret=f"[{self.mod}] config reloaded"
+            logging.info(ret)
+            print(ret)
+            return ret
+        except Exception:
+            ret=f"[{self.mod}] config reload failed"
+            logging.info(ret)
+            self.cfg=prev_conf
+            mod.__init__(*_)
+            return ret
+    
     def load_config(self) -> None:
         """ Load config """
         try:

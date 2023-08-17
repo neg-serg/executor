@@ -7,6 +7,7 @@ scripts, because there is no parsing / translation phase here in runtime. '''
 import subprocess
 import shlex
 import asyncio
+import logging
 from typing import List
 from executor.execenv import execenv as env
 from executor.cfg import cfg
@@ -54,14 +55,22 @@ class Executor(extension):
     ''' Terminal manager. Easy and consistent way to create tmux sessions on dedicated sockets. The main advantage is dynamic config
     reloading and simplicity of adding or modifing of various parameters. '''
     def __init__(self) -> None:
+        log=logging.getLogger()
+        from systemd import journal
+        log.addHandler(journal.JournalHandler())
+        log.setLevel(logging.INFO)
         self.envs = {}
-        self.cfg = cfg().cfg
+        self.config = cfg()
+        self.cfg = self.config.cfg
         self.envs = {}
         for app in self.cfg:
             self.envs[app] = env(app, self.cfg)
 
     def __exit__(self) -> None:
         self.envs.clear()
+
+    def reload(self) -> str:
+        return str(self.config.reload(self))
 
     @staticmethod
     def print_exec(s) -> None:
