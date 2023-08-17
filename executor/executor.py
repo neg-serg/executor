@@ -57,7 +57,7 @@ class Executor(extension):
     def __init__(self) -> None:
         log=logging.getLogger()
         from systemd import journal
-        log.addHandler(journal.JournalHandler())
+        log.addHandler(journal.JournaldLogHandler())
         log.setLevel(logging.INFO)
         self.envs = {}
         self.config = cfg()
