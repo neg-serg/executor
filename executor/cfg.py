@@ -35,7 +35,7 @@ class cfg():
                 raise
 
     def load_config(self) -> None:
-        """ Reload config """
+        """ Load config """
         try:
             with open(self.cfg_path, "rb") as mod_cfg:
                 self.cfg=yaml.load(mod_cfg, Loader=yaml.CLoader)
