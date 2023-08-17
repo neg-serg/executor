@@ -13,7 +13,6 @@ packages=[
 ]
 
 [tool.poetry.dependencies]
-docopt='*'
 i3ipc='*'
 ruamel-yaml='*'
 python='^3.8'
