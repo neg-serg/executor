@@ -47,3 +47,11 @@ torrment:
   instance_group: smaller_term
   padding: [8, 8]
   term: kitty
+
+ncpamixer:
+  classw: ncpamixer
+  exec: ncpamixer
+  font: Iosevka
+  font_normal: Medium
+  font_size: 14
+  opacity: 0.95
