@@ -62,7 +62,8 @@ class cfg():
     def load_config(self) -> None:
         """ Load config """
         try:
+            y=yaml.YAML(typ='rt')
             with open(self.cfg_path, "rb") as mod_cfg:
-                self.cfg=yaml.load(mod_cfg, Loader=yaml.CLoader)
+                self.cfg=y.load(mod_cfg)
         except FileNotFoundError:
             logging.error(f'file {self.cfg_path} not exists')
