@@ -5,8 +5,8 @@ description="Terminal manager"
 authors=["Neg <serg.zorg@gmail.com>"]
 license="LGPL-3.0 License"
 readme=['README.md']
-homepage=""
-repository=""
+homepage="https://github.com/neg-serg/executor"
+repository="https://github.com/neg-serg/executor"
 packages=[
     {include='executor/__main__.py'},
     {include='executor/*.py'},
@@ -16,7 +16,7 @@ packages=[
 i3ipc='*'
 ruamel-yaml='*'
 systemd='*'
-python='^3.8'
+python='^3.11'
 
 [tool.poetry.dev-dependencies]
 
