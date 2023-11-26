@@ -1,8 +1,20 @@
 #!/usr/bin/python
 import asyncio
 from sys import argv
-import subprocess
+import inotify
+import inotify.adapters
+from threading import Thread
 from executor.executor import Executor, MsgBroker
+
+def config_watch():
+    i=inotify.adapters.Inotify()
+    i.add_watch(executor.config.dir())
+    for event in i.event_gen(yield_nones=False):
+        if event is None:
+            return
+        (_, type_names, _, _) = event
+        if type_names == ['IN_CLOSE_WRITE']:
+            executor.reload()
 
 if __name__ == '__main__':
     loop=asyncio.new_event_loop()
@@ -12,10 +24,7 @@ if __name__ == '__main__':
         cmd = argv[1]
         if cmd == 'daemon':
             port = 15556
-            subprocess.Popen([
-                'watchexec', '-w', executor.config.dir(),
-                'echo reload | nc localhost 15556 -N'
-            ], stdout=subprocess.PIPE)
+            Thread(target=config_watch,daemon=True).start()
             MsgBroker.mainloop(loop, executor, port)
     for arg in argv[2:]:
         if cmd == 'config' or cmd == 'cfg':
