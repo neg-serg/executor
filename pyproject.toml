@@ -14,9 +14,10 @@ packages=[
 
 [tool.poetry.dependencies]
 i3ipc='*'
+inotify='*'
+python='^3.11'
 ruamel-yaml='*'
 systemd='*'
-python='^3.11'
 
 [tool.poetry.dev-dependencies]
 
