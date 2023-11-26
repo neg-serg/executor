@@ -15,9 +15,9 @@ class utils():
     def run_once(f):
         def wrapper(*args, **kwargs):
             if not wrapper.has_run:
-                wrapper.has_run = True
+                wrapper.has_run=True
                 return f(*args, **kwargs)
-        wrapper.has_run = False
+        wrapper.has_run=False
         return wrapper
 
     @staticmethod
@@ -58,32 +58,32 @@ class execenv():
     ''' Environment class. It is a helper for tmux manager to store info about currently selected application. This class rules over
     parameters and settings of application, like used terminal enumator, fonts, all path settings, etc.
     config: manager to autosave/autoload configutation with inotify '''
-    cache = utils.cache_path()
-    paths = {}
+    cache=utils.cache_path()
+    paths={}
 
     def __init__(self, name: str, config) -> None:
-        self.name, self.config = name, config
+        self.name, self.config=name, config
         if not self.cfg_block():
             logging.error(f'Cannot create config for {name}, with config {config}')
             return
         utils.create_dir(utils.cache_path())
-        blk = self.cfg_block()
-        term = self.term()
+        blk=self.cfg_block()
+        term=self.term()
         blk.setdefault('exec', [])
         blk.setdefault('exec_tmux', [])
         blk.setdefault('exec_dtach', [])
-        self.exec_tmux = blk['exec_tmux']
+        self.exec_tmux=blk['exec_tmux']
         if not self.exec_tmux:
-            exec_dtach = blk['exec_dtach']
+            exec_dtach=blk['exec_dtach']
             if not exec_dtach:
-                self.exec = blk['exec']
+                self.exec=blk['exec']
             else:
                 execenv.prepare_dtach()
-                self.exec = f'dtach -A {execenv.paths["dtach_session_dir"]}' \
+                self.exec=f'dtach -A {execenv.paths["dtach_session_dir"]}' \
                             f'/{name}.session {exec_dtach}'
         blk.setdefault('classw', term)
-        self.wclass = blk['classw']
-        self.opts = getattr(self, term)()
+        self.wclass=blk['classw']
+        self.opts=getattr(self, term)()
 
         def join_processes():
             for prc in multiprocessing.active_children():
@@ -93,20 +93,20 @@ class execenv():
     @utils.run_once
     @staticmethod
     def prepare_alacritty():
-        execenv.paths['alacritty_cfg_dir'] = f'{execenv.cache}/alacritty_cfg'
-        execenv.paths['alacritty_cfg'] = expanduser(f'{utils.xdg_config_home()}/alacritty/alacritty.yml')
+        execenv.paths['alacritty_cfg_dir']=f'{execenv.cache}/alacritty_cfg'
+        execenv.paths['alacritty_cfg']=expanduser(f'{utils.xdg_config_home()}/alacritty/alacritty.yml')
         utils.create_dir(execenv.paths['alacritty_cfg_dir'])
 
     @utils.run_once
     @staticmethod
     def prepare_tmux():
-        execenv.paths['tmux_socket_dir'] = f'{execenv.cache}/tmux_sockets'
+        execenv.paths['tmux_socket_dir']=f'{execenv.cache}/tmux_sockets'
         utils.create_dir(execenv.paths['tmux_socket_dir'])
 
     @utils.run_once
     @staticmethod
     def prepare_dtach():
-        execenv.paths['dtach_session_dir'] = f'{execenv.cache}/dtach_sessions'
+        execenv.paths['dtach_session_dir']=f'{execenv.cache}/dtach_sessions'
         utils.create_dir(execenv.paths['dtach_session_dir'])
 
     @staticmethod
@@ -128,16 +128,16 @@ class execenv():
         return self.cfg_block().get('shell', 'dash')
 
     def font(self) -> str:
-        ret = self.config.get('default_font', '')
+        ret=self.config.get('default_font', '')
         if not ret:
-            ret = self.cfg_block().get('font', 'Iosevka')
+            ret=self.cfg_block().get('font', 'Iosevka')
         return ret
 
     def font_size(self) -> str:
         return self.cfg_block().get('font_size', '14')
 
     def term(self):
-        term = self.cfg_block().get('term', '')
+        term=self.cfg_block().get('term', '')
         if term:
             return term
         # Detect fallback terminal
@@ -148,10 +148,10 @@ class execenv():
         return ''
 
     def style(self) -> dict:
-        use_one_fontstyle = self.config.get('use_one_fontstyle', False)
-        style = self.config.get('default_style', '')
+        use_one_fontstyle=self.config.get('use_one_fontstyle', False)
+        style=self.config.get('default_style', '')
         if not style:
-            style = self.cfg_block().get('style', 'Regular')
+            style=self.cfg_block().get('style', 'Regular')
         if use_one_fontstyle:
             return {
                 'normal': self.cfg_block().get('font_normal', style),
@@ -175,11 +175,11 @@ class execenv():
             config: config dirtionary
             name(str): name of config to generate
             cfgname(str): configname '''
-            app_name = self.config.get(name, {}).get('app_name', '')
+            app_name=self.config.get(name, {}).get('app_name', '')
             if not app_name:
-                app_name = self.config.get(name, {}).get('classw')
-            app_name = f'{app_name}.yml'
-            cfgname = expanduser(f'{execenv.paths["alacritty_cfg_dir"]}/{app_name}')
+                app_name=self.config.get(name, {}).get('classw')
+            app_name=f'{app_name}.yml'
+            cfgname=expanduser(f'{execenv.paths["alacritty_cfg_dir"]}/{app_name}')
             shutil.copyfile(execenv.paths["alacritty_cfg"], cfgname)
             return cfgname
 
@@ -188,25 +188,25 @@ class execenv():
             custom_config(str): config name to create '''
             import yaml
             import yamlloader
-            conf = None
+            conf=None
             with open(custom_config, 'r', encoding='utf-8') as cfg_file:
                 try:
-                    conf = yaml.load(
+                    conf=yaml.load(
                         cfg_file, Loader=yamlloader.ordereddict.CSafeLoader)
                     if conf is not None:
                         if 'font' in conf:
-                            font = conf['font']
+                            font=conf['font']
                             for w in 'normal', 'bold', 'italic':
-                                font[w]['family'] = self.font()
-                                font[w]['style'] = self.style()[w]
-                            font['size'] = self.font_size()
+                                font[w]['family']=self.font()
+                                font[w]['style']=self.style()[w]
+                            font['size']=self.font_size()
                         if 'window' in conf:
-                            window = conf['window']
-                            padding = self.cfg_block().get('padding', [2, 2])
-                            opacity = self.cfg_block().get('opacity', 0.88)
-                            window['opacity'] = opacity
-                            window['padding']['x'] = int(padding[0])
-                            window['padding']['y'] = int(padding[1])
+                            window=conf['window']
+                            padding=self.cfg_block().get('padding', [2, 2])
+                            opacity=self.cfg_block().get('opacity', 0.88)
+                            window['opacity']=opacity
+                            window['padding']['x']=int(padding[0])
+                            window['padding']['y']=int(padding[1])
                 except yaml.YAMLError as yamlerror:
                     logging.error(yamlerror)
 
@@ -225,8 +225,8 @@ class execenv():
                     except yaml.YAMLError as yamlerror:
                         logging.error(yamlerror)
 
-        self.title = self.cfg_block().get('title', self.wclass)
-        custom_config = create_alacritty_cfg(self.name)
+        self.title=self.cfg_block().get('title', self.wclass)
+        custom_config=create_alacritty_cfg(self.name)
         multiprocessing.Process(
             target=alacritty_yml_create, args=(custom_config,),
             daemon=True
@@ -247,11 +247,11 @@ class execenv():
             '-e'])
 
     def kitty(self):
-        cfg = self.cfg_block()
-        padding = cfg.get('padding', [0, 0])[0]
-        opacity = cfg.get('opacity', 0.88)
-        instance_group = cfg.get('instance_group', self.name)
-        style = self.style()['normal']
+        cfg=self.cfg_block()
+        padding=cfg.get('padding', [0, 0])[0]
+        opacity=cfg.get('opacity', 0.88)
+        instance_group=cfg.get('instance_group', self.name)
+        style=self.style()['normal']
         if style == 'Regular':
             style=''
         else:
