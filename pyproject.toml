@@ -17,7 +17,6 @@ i3ipc='*'
 inotify='*'
 python='^3.11'
 ruamel-yaml='*'
-systemd='*'
 
 [tool.poetry.dev-dependencies]
 
