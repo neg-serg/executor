@@ -12,11 +12,15 @@ packages=[
     {include='executor/*.py'},
 ]
 
+[tool.poetry.scripts]
+executor="executor.executor:Executor.main"
+
 [tool.poetry.dependencies]
-i3ipc='*'
+i3ipc = {git = "https://github.com/altdesktop/i3ipc-python", branch = "master" }
 inotify='*'
 python='^3.11'
-ruamel-yaml='*'
+ruamel-yaml='0.18.5'
+systemd='*'
 
 [tool.poetry.dev-dependencies]
 

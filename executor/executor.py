@@ -4,11 +4,16 @@ Tmux. The main advantage is dynamic config reloading and simplicity of adding
 or modifing of various parameters, also it works is faster then dedicated
 scripts, because there is no parsing / translation phase here in runtime. '''
 
-import subprocess
-import shlex
-import asyncio
-import logging
+from sys import argv
+from threading import Thread
 from typing import List
+import asyncio
+import inotify
+import inotify.adapters
+import logging
+import shlex
+import subprocess
+
 from executor.execenv import execenv as env
 from executor.cfg import cfg
 
@@ -140,3 +145,43 @@ class Executor(extension):
             cmd=f'{self.env.opts} {self.env.exec}'
             return cmd
         return ''
+
+    def main():
+        EXECUTOR_PORT=15556
+        def config_watch():
+            i=inotify.adapters.Inotify()
+            i.add_watch(executor.config.dir())
+            for event in i.event_gen(yield_nones=False):
+                if event is None:
+                    return
+                (_, type_names, _, _)=event
+                if type_names == ['IN_CLOSE_WRITE']:
+                    executor.reload()
+
+        # loop=asyncio.new_event_loop()
+        # executor=Executor()
+        # cmd=''
+        # if len(argv) >= 2: # should have cmd at least
+        #     cmd=argv[1]
+        #     if cmd == 'daemon':
+        #         Thread(target=config_watch,daemon=True).start()
+        #         MsgBroker.mainloop(loop, executor, EXECUTOR_PORT)
+        # for arg in argv[2:]:
+        #     if cmd in {'config','cfg'}:
+        #         print(executor.cfg[arg])
+        #     if cmd in {'run','prog'}:
+        #         executor.run(arg)
+                
+        loop=asyncio.new_event_loop()
+        executor=Executor()
+        cmd=''
+        if len(argv) >= 2: # should have cmd at least
+            cmd=argv[1]
+            if cmd == 'daemon':
+                Thread(target=config_watch,daemon=True).start()
+                MsgBroker.mainloop(loop, executor, EXECUTOR_PORT)
+        for arg in argv[2:]:
+            if cmd in {'config','cfg'}:
+                print(executor.cfg[arg])
+            if cmd in {'run','prog'}:
+                executor.run(arg)
