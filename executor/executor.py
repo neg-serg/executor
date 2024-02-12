@@ -61,11 +61,6 @@ class Executor(extension):
     reloading and simplicity of adding or modifing of various parameters. '''
     def __init__(self) -> None:
         log=logging.getLogger()
-        try:
-            from systemd import journal
-            log.addHandler(journal.JournaldLogHandler())
-        except:
-            log.error('Cannot setup systemd log')
         log.setLevel(logging.INFO)
         self.envs={}
         self.config=cfg()

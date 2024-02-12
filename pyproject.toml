@@ -20,7 +20,6 @@ i3ipc = {git = "https://github.com/altdesktop/i3ipc-python", branch = "master" }
 inotify='*'
 python='^3.11'
 ruamel-yaml='0.18.5'
-systemd='*'
 
 [tool.poetry.dev-dependencies]
 
